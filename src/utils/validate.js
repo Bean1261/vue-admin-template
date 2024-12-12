@@ -6,6 +6,8 @@
  * @param {string} path
  * @returns {Boolean}
  */
+
+// 检查超链接的协议
 export function isExternal(path) {
   return /^(https?:|mailto:|tel:)/.test(path)
 }
