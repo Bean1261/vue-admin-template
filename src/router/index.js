@@ -51,8 +51,36 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: '首页', icon: 'dashboard', affix: true }
     }]
+  },
+
+  {
+    path: '/系统管理',
+    component: Layout,
+    alwaysShow: true,
+    name: 'system',
+    meta: { title: '系统管理', icon: 'el-icon-s-help' },
+    children: [
+      {
+        path: '/sysUserList',
+        name: 'sysUserList',
+        component: () => import('@/views/system/sysUserList'),
+        meta: { title: '用户管理', icon: 'table' }
+      },
+      {
+        path: '/sysRoleList',
+        name: 'sysRoleList',
+        component: () => import('@/views/system/sysRoleList'),
+        meta: { title: '角色管理', icon: 'tree' }
+      },
+      {
+        path: '/sysMenuList',
+        name: 'sysMenuList',
+        component: () => import('@/views/system/sysMenuList'),
+        meta: { title: '菜单管理', icon: 'tree' }
+      }
+    ]
   },
 
   {
