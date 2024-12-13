@@ -1,6 +1,6 @@
 import defaultSettings from '@/settings'
 
-const title = defaultSettings.title || '燃气动力管理系统'
+const title = defaultSettings.title || 'Vue Element Admin'
 
 export default function getPageTitle(pageTitle) {
   if (pageTitle) {
