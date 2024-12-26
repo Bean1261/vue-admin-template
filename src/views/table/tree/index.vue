@@ -156,67 +156,116 @@
         </el-form-item>
       </div>
 
-      <el-form-item label="考核人员" class="red-label">
-        <el-input v-model="ledgerForm.assessmentPerson" placeholder="请输入考核人员" class="red-text" />
-      </el-form-item>
-
-      <el-form-item label="考核金额" class="red-label">
-        <el-input v-model="ledgerForm.assessmentAmount" type="number" placeholder="请输入考核金额" class="red-text" />
-      </el-form-item>
-
       <el-button type="primary" @click="handleSubmit">提交</el-button>
     </el-form>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
       ledgerForm: {
-        inspectionType: '',
-        checkTime: '',
+        inspectionType: '', // 默认值为空字符串
+        checkTime: '', // 默认值为空
         rectificationDeadline: '',
-        hazardSeverity: '',
-        issueCategory: '',
-        subCategory: '',
-        detailedCategory: '',
-        department: '',
-        hazardArea: '',
-        personInCharge: '',
+        hazardSeverity: '轻微', // 设置默认值为“轻微”
+        issueCategory: '未分类', // 默认值
+        subCategory: '未分类',
+        detailedCategory: '未分类',
+        department: '未指定', // 默认值
+        hazardArea: '未指定',
+        personInCharge: '未分配', // 默认值
         subArea: '',
         detailedArea: '',
         issueObject: '',
         issueMode: '',
-        lValue: '',
-        eValue: '',
-        cValue: '',
-        dValue: '',
+        lValue: 0, // 数字默认值为 0
+        eValue: 0,
+        cValue: 0,
+        dValue: 0,
         beforeRectificationPhoto: '',
         issueDescription: '',
-        isFirstDiscovery: false,
-        teamLeader: '',
-        deductionScore: '',
-        inspector: '',
+        isFirstDiscovery: false, // 默认值为 false
+        teamLeader: '未指定',
+        deductionScore: 0, // 数字默认值
+        inspector: '未指定',
         afterRectificationPhoto: '',
-        analysisAndMeasures: '',
+        analysisAndMeasures: '未填写', // 默认说明
         rectificationFinishTime: '',
-        assessmentPerson: '',
-        assessmentAmount: ''
+        assessmentPerson: '未分配',
+        assessmentAmount: 0
       }
     }
   },
   methods: {
     handleSubmit() {
+      // 在提交前补充默认值
+      const defaultValues = {
+        inspectionType: '未填写',
+        checkTime: '',
+        rectificationDeadline: '',
+        hazardSeverity: '轻微',
+        issueCategory: '未分类',
+        subCategory: '未分类',
+        detailedCategory: '未分类',
+        department: '未指定',
+        hazardArea: '未指定',
+        personInCharge: '未分配',
+        subArea: '',
+        detailedArea: '',
+        issueObject: '',
+        issueMode: '',
+        lValue: 0,
+        eValue: 0,
+        cValue: 0,
+        dValue: 0,
+        beforeRectificationPhoto: '',
+        issueDescription: '未填写',
+        isFirstDiscovery: false,
+        teamLeader: '未指定',
+        deductionScore: 0,
+        inspector: '未指定',
+        afterRectificationPhoto: '',
+        analysisAndMeasures: '未填写',
+        rectificationFinishTime: '',
+        assessmentPerson: '未分配',
+        assessmentAmount: 0
+      };
+
+      // 遍历补充默认值
+      for (const key in defaultValues) {
+        if (!this.ledgerForm[key]) {
+          this.ledgerForm[key] = defaultValues[key];
+        }
+      }
+
       console.log('表单数据提交：', this.ledgerForm)
       // 提交表单逻辑
+      axios.post('/api/ledger/add', this.ledgerForm)
+        .then(response => {
+          console.log('提交成功：', response.data);
+          this.$message.success('提交成功！');
+        })
+        .catch(error => {
+          console.error('Request failed:', error);
+          if (error.response) {
+            console.error('Error response:', error.response.data);
+          } else if (error.request) {
+            console.error('Error request:', error.request);
+          } else {
+            console.error('Error message:', error.message);
+          }
+        });
     },
     handlePictureSuccess(response, file, fileList) {
       // 处理上传成功的照片
     },
     beforeUpload(file) {
       // 上传前的验证逻辑
-      return true
+      return true;
     }
   }
 }

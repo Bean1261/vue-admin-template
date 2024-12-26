@@ -79,6 +79,12 @@ export const constantRoutes = [
         name: 'sysMenuList',
         component: () => import('@/views/system/sysMenuList'),
         meta: { title: '菜单管理', icon: 'tree' }
+      },
+      {
+        path: 'hello',
+        name: 'hello',
+        component: () => import('@/views/system/hello'),
+        meta: { title: 'hello', icon: 'edit' }
       }
     ]
   },
