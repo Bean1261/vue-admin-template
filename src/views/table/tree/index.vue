@@ -1,297 +1,202 @@
 <template>
-  <div class="ledger-form">
-    <div class="content">
-      <h1>燃气动力公司安全生产隐患排查治理台账</h1>
-    </div>
-    <el-form ref="ledgerForm" :model="ledgerForm" label-width="120px" @submit.prevent="handleSubmit">
-      <div class="form-row">
-        <el-form-item label="巡查类型">
-          <el-input v-model="ledgerForm.inspectionType" placeholder="请输入巡查类型" />
-        </el-form-item>
+  <div class="ledger-management">
+    <!-- 搜索栏 -->
+    <el-row :gutter="20" class="search-row">
+      <el-col :span="8">
+        <el-input
+          v-model="searchQuery"
+          placeholder="请输入问题大类或描述"
+          clearable
+          @input="handleSearch"
+        ></el-input>
+      </el-col>
+      <el-col :span="16" class="text-right">
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">搜索</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="openAddDialog">新增隐患</el-button>
+      </el-col>
+    </el-row>
 
-        <el-form-item label="排查时间">
-          <el-date-picker v-model="ledgerForm.checkTime" type="date" placeholder="选择排查时间" />
+    <!-- 隐患台账列表 -->
+    <el-table :data="filteredLedger" stripe border style="width: 100%">
+      <el-table-column label="问题大类" prop="issueCategory" min-width="180"></el-table-column>
+      <el-table-column label="隐患描述" prop="issueDescription" min-width="300"></el-table-column>
+      <el-table-column label="整改完成时间" prop="rectificationFinishTime" min-width="180"></el-table-column>
+      <el-table-column label="操作" width="220">
+        <template #default="scope">
+          <el-button size="small" @click="openEditDialog(scope.row)" type="primary">编辑</el-button>
+          <el-button size="small" type="danger" @click="deleteLedger(scope.row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 添加/编辑隐患的对话框 -->
+    <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="500px">
+      <el-form :model="currentLedger" ref="ledgerForm" :rules="ledgerRules" label-width="120px">
+        <el-form-item label="问题大类" prop="issueCategory">
+          <el-input v-model="currentLedger.issueCategory" placeholder="请输入问题大类"></el-input>
         </el-form-item>
+        <el-form-item label="隐患描述" prop="issueDescription">
+          <el-input v-model="currentLedger.issueDescription" type="textarea" placeholder="请输入隐患描述"></el-input>
+        </el-form-item>
+        <el-form-item label="整改完成时间" prop="rectificationFinishTime">
+          <el-date-picker v-model="currentLedger.rectificationFinishTime" type="date" placeholder="选择整改完成时间" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveLedger">保存</el-button>
       </div>
-
-      <div class="form-row">
-        <el-form-item label="限期整改时间">
-          <el-date-picker v-model="ledgerForm.rectificationDeadline" type="date" placeholder="选择限期整改时间" />
-        </el-form-item>
-
-        <el-form-item label="隐患严重程度">
-          <el-select v-model="ledgerForm.hazardSeverity" placeholder="选择隐患严重程度">
-            <el-option label="轻微" value="轻微" />
-            <el-option label="中等" value="中等" />
-            <el-option label="严重" value="严重" />
-          </el-select>
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="问题大类">
-          <el-input v-model="ledgerForm.issueCategory" placeholder="请输入问题大类" />
-        </el-form-item>
-
-        <el-form-item label="问题子类">
-          <el-input v-model="ledgerForm.subCategory" placeholder="请输入问题子类" />
-        </el-form-item>
-
-        <el-form-item label="详细分类">
-          <el-input v-model="ledgerForm.detailedCategory" placeholder="请输入详细分类" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="责任科室">
-          <el-input v-model="ledgerForm.department" placeholder="请输入责任科室" />
-        </el-form-item>
-
-        <el-form-item label="隐患区域">
-          <el-input v-model="ledgerForm.hazardArea" placeholder="请输入隐患区域" />
-        </el-form-item>
-
-        <el-form-item label="责任人">
-          <el-input v-model="ledgerForm.personInCharge" placeholder="请输入责任人" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="子区域">
-          <el-input v-model="ledgerForm.subArea" placeholder="请输入子区域" />
-        </el-form-item>
-
-        <el-form-item label="详细区域">
-          <el-input v-model="ledgerForm.detailedArea" placeholder="请输入详细区域" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="问题对象">
-          <el-input v-model="ledgerForm.issueObject" placeholder="请输入问题对象" />
-        </el-form-item>
-
-        <el-form-item label="问题模式">
-          <el-input v-model="ledgerForm.issueMode" placeholder="请输入问题模式" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="L值">
-          <el-input v-model="ledgerForm.lValue" type="number" placeholder="请输入L值" />
-        </el-form-item>
-
-        <el-form-item label="E值">
-          <el-input v-model="ledgerForm.eValue" type="number" placeholder="请输入E值" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="C值">
-          <el-input v-model="ledgerForm.cValue" type="number" placeholder="请输入C值" />
-        </el-form-item>
-
-        <el-form-item label="D值">
-          <el-input v-model="ledgerForm.dValue" type="number" placeholder="请输入D值" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="整改前照片">
-          <el-upload
-            action="/upload"
-            list-type="picture-card"
-            :on-success="handlePictureSuccess"
-            :before-upload="beforeUpload"
-          >
-            <el-button>点击上传</el-button>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="问题描述">
-          <el-input v-model="ledgerForm.issueDescription" type="textarea" placeholder="请输入问题描述" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="是否首次发现">
-          <el-switch v-model="ledgerForm.isFirstDiscovery" />>
-        </el-form-item>
-
-        <el-form-item label="区域班组长">
-          <el-input v-model="ledgerForm.teamLeader" placeholder="请输入区域班组长" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="扣分值">
-          <el-input v-model="ledgerForm.deductionScore" type="number" placeholder="请输入扣分值" />
-        </el-form-item>
-
-        <el-form-item label="检查人">
-          <el-input v-model="ledgerForm.inspector" placeholder="请输入检查人" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="整改后照片">
-          <el-upload
-            action="/upload"
-            list-type="picture-card"
-            :on-success="handlePictureSuccess"
-            :before-upload="beforeUpload"
-          >
-            <el-button>点击上传</el-button>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="原因分析及整改措施">
-          <el-input v-model="ledgerForm.analysisAndMeasures" type="textarea" placeholder="请输入原因分析及整改措施" />
-        </el-form-item>
-      </div>
-
-      <div class="form-row">
-        <el-form-item label="整改完成时间">
-          <el-date-picker v-model="ledgerForm.rectificationFinishTime" type="date" placeholder="选择整改完成时间" />
-        </el-form-item>
-      </div>
-
-      <el-button type="primary" @click="handleSubmit">提交</el-button>
-    </el-form>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 
 export default {
   data() {
     return {
-      ledgerForm: {
-        inspectionType: '', // 默认值为空字符串
-        checkTime: '', // 默认值为空
-        rectificationDeadline: '',
-        hazardSeverity: '轻微', // 设置默认值为“轻微”
-        issueCategory: '未分类', // 默认值
-        subCategory: '未分类',
-        detailedCategory: '未分类',
-        department: '未指定', // 默认值
-        hazardArea: '未指定',
-        personInCharge: '未分配', // 默认值
-        subArea: '',
-        detailedArea: '',
-        issueObject: '',
-        issueMode: '',
-        lValue: 0, // 数字默认值为 0
-        eValue: 0,
-        cValue: 0,
-        dValue: 0,
-        beforeRectificationPhoto: '',
-        issueDescription: '',
-        isFirstDiscovery: false, // 默认值为 false
-        teamLeader: '未指定',
-        deductionScore: 0, // 数字默认值
-        inspector: '未指定',
-        afterRectificationPhoto: '',
-        analysisAndMeasures: '未填写', // 默认说明
-        rectificationFinishTime: '',
-        assessmentPerson: '未分配',
-        assessmentAmount: 0
+      // 示例数据
+      ledgerData: [
+        { id: 1, issueCategory: '设备故障', issueDescription: '电力设备老化导致停机', rectificationFinishTime: '2024-12-30' },
+        { id: 2, issueCategory: '安全隐患', issueDescription: '消防设备未定期检查', rectificationFinishTime: '2024-12-15' },
+        { id: 3, issueCategory: '操作错误', issueDescription: '操作员未按规范操作设备', rectificationFinishTime: '2024-12-20' }
+      ],
+      currentLedger: { id: null, issueCategory: '', issueDescription: '', rectificationFinishTime: '' },
+      dialogVisible: false,
+      dialogTitle: '新增隐患',
+      ledgerRules: {
+        issueCategory: [
+          { required: true, message: '请输入问题大类', trigger: 'blur' }
+        ],
+        issueDescription: [
+          { required: true, message: '请输入隐患描述', trigger: 'blur' }
+        ],
+        rectificationFinishTime: [
+          { required: true, message: '请选择整改完成时间', trigger: 'blur' }
+        ]
+      },
+      searchQuery: '', // 搜索查询条件
+    };
+  },
+  computed: {
+    // 计算属性，用于过滤隐患台账
+    filteredLedger() {
+      if (!this.searchQuery) {
+        return this.ledgerData; // 如果没有搜索条件，返回所有隐患
       }
+      return this.ledgerData.filter(ledger => {
+        return ledger.issueCategory.includes(this.searchQuery) || ledger.issueDescription.includes(this.searchQuery);
+      });
     }
   },
   methods: {
-    handleSubmit() {
-      // 在提交前补充默认值
-      const defaultValues = {
-        inspectionType: '未填写',
-        checkTime: '',
-        rectificationDeadline: '',
-        hazardSeverity: '轻微',
-        issueCategory: '未分类',
-        subCategory: '未分类',
-        detailedCategory: '未分类',
-        department: '未指定',
-        hazardArea: '未指定',
-        personInCharge: '未分配',
-        subArea: '',
-        detailedArea: '',
-        issueObject: '',
-        issueMode: '',
-        lValue: 0,
-        eValue: 0,
-        cValue: 0,
-        dValue: 0,
-        beforeRectificationPhoto: '',
-        issueDescription: '未填写',
-        isFirstDiscovery: false,
-        teamLeader: '未指定',
-        deductionScore: 0,
-        inspector: '未指定',
-        afterRectificationPhoto: '',
-        analysisAndMeasures: '未填写',
-        rectificationFinishTime: '',
-        assessmentPerson: '未分配',
-        assessmentAmount: 0
-      };
+    // 处理搜索，点击搜索按钮或者输入时触发
+    handleSearch() {
+      // 计算属性已经处理了搜索逻辑
+    },
 
-      // 遍历补充默认值
-      for (const key in defaultValues) {
-        if (!this.ledgerForm[key]) {
-          this.ledgerForm[key] = defaultValues[key];
-        }
-      }
+    // 打开新增隐患对话框
+    openAddDialog() {
+      this.dialogTitle = '新增隐患';
+      this.currentLedger = { id: null, issueCategory: '', issueDescription: '', rectificationFinishTime: '' }; // 清空表单
+      this.dialogVisible = true;
+    },
 
-      console.log('表单数据提交：', this.ledgerForm)
-      // 提交表单逻辑
-      axios.post('/api/ledger/add', this.ledgerForm)
-        .then(response => {
-          console.log('提交成功：', response.data);
-          this.$message.success('提交成功！');
-        })
-        .catch(error => {
-          console.error('Request failed:', error);
-          if (error.response) {
-            console.error('Error response:', error.response.data);
-          } else if (error.request) {
-            console.error('Error request:', error.request);
+    // 打开编辑隐患对话框
+    openEditDialog(ledger) {
+      this.dialogTitle = '编辑隐患';
+      this.currentLedger = { ...ledger }; // 填充表单数据
+      this.dialogVisible = true;
+    },
+
+    // 保存隐患（新增或编辑）
+    saveLedger() {
+      this.$refs.ledgerForm.validate(valid => {
+        if (valid) {
+          if (this.currentLedger.id) {
+            // 编辑隐患
+            axios.put(`/api/ledger/${this.currentLedger.id}`, this.currentLedger)
+              .then(() => {
+                this.$message.success('隐患编辑成功');
+                this.fetchLedger(); // 重新获取隐患台账
+                this.dialogVisible = false;
+              })
+              .catch(() => {
+                this.$message.error('隐患编辑失败');
+              });
           } else {
-            console.error('Error message:', error.message);
+            // 新增隐患
+            axios.post('/api/ledger', this.currentLedger)
+              .then(() => {
+                this.$message.success('隐患新增成功');
+                this.fetchLedger(); // 重新获取隐患台账
+                this.dialogVisible = false;
+              })
+              .catch(() => {
+                this.$message.error('隐患新增失败');
+              });
           }
-        });
+        }
+      });
     },
-    handlePictureSuccess(response, file, fileList) {
-      // 处理上传成功的照片
+
+    // 删除隐患
+    deleteLedger(ledgerId) {
+      this.$confirm('确定删除该隐患吗？', '提示', {
+        type: 'warning'
+      }).then(() => {
+        axios.delete(`/api/ledger/${ledgerId}`)
+          .then(() => {
+            this.$message.success('隐患删除成功');
+            this.fetchLedger(); // 重新获取隐患台账
+          })
+          .catch(() => {
+            this.$message.error('隐患删除失败');
+          });
+      });
     },
-    beforeUpload(file) {
-      // 上传前的验证逻辑
-      return true;
+
+    // 获取隐患台账（假设从API获取数据，当前为模拟数据）
+    fetchLedger() {
+      // 这里模拟获取数据
+      // axios.get('/api/ledger')
+      //   .then(response => {
+      //     this.ledgerData = response.data;
+      //   })
+      //   .catch(error => {
+      //     this.$message.error('获取隐患台账失败');
+      //   });
     }
+  },
+  created() {
+    this.fetchLedger(); // 页面加载时获取隐患台账
   }
-}
+};
 </script>
 
 <style scoped>
-.form-row {
-  display: flex;
-  justify-content: space-between; /* 或者使用 space-around, space-evenly 等 */
-  margin-bottom: 20px; /* 行间距 */
+.ledger-management {
+  padding: 20px;
 }
-.form-row .el-form-item {
-  flex: 1; /* 使每个表单项占据相同的宽度 */
-  margin-right: 20px; /* 右侧间距 */
+
+.search-row {
+  margin-bottom: 20px;
 }
-.form-row .el-form-item:last-child {
-  margin-right: 0; /* 最后一个表单项不需要右侧间距 */
+
+.text-right {
+  text-align: right;
 }
-.content {
-  display: flex;
-  justify-content: center; /* 水平居中 */
+
+.dialog-footer {
+  text-align: right;
 }
-.red-label .el-form-item__label {
-  color: red;
+
+.el-table {
+  margin-top: 20px;
 }
-.red-text .el-input__inner {
-  color: red;
+
+.el-table .el-button {
+  margin-right: 10px;
 }
 </style>

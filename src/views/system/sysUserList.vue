@@ -16,11 +16,10 @@
         />
       </el-form-item>
 
-      <!-- 电话输入框 -->
       <el-form-item>
         <el-input
           v-model="listParm.phone"
-          placeholder="请输入电话"
+          placeholder="请输入ID"
         />
       </el-form-item>
 
@@ -46,8 +45,8 @@
     <!-- 表格 -->
     <el-table :height="tableHeight" :data="tableData" border stripe>
       <el-table-column prop="name" label="姓名" />
-      <el-table-column prop="address" label="地址" />
-      <el-table-column prop="date" label="日期" />
+      <el-table-column prop="address" label="ID" />
+      <el-table-column prop="date" label="角色" />
       <el-table-column label="操作" align="center" width="180">
         <template #default="{ scope }">
           <el-button
@@ -97,14 +96,14 @@ export default {
       // 表格数据
       tableData: [
         {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
+          date: '管理员',
+          name: '小孟',
+          address: '00001'
         },
         {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
+          date: '用户',
+          name: '小姚',
+          address: '00002'
         }
       ]
     }
