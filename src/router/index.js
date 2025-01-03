@@ -67,29 +67,21 @@ export const constantRoutes = [
   {
     path: '/example',
     component: Layout,
-    redirect: '/example/table',
+    redirect: '/example/tree', // 默认重定向到第一个子页面
     name: 'Example',
-    meta: { title: '流程申请', icon: 'el-icon-s-help' },
+    meta: { title: '安全巡查流程申请', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
+        path: 'tree',
+        name: 'SafetyInspectionAdd', // 更具体的命名
         component: () => import('@/views/table/tree/index'),
-        meta: { title: '安全管理', icon: 'table' },
-        children: [
-          {
-            path: 'tree',
-            name: 'Tree',
-            component: () => import('@/views/table/tree/index'),
-            meta: { title: '安全巡查添加', icon: 'tree' }
-          },
-          {
-            path: 'form',
-            name: 'Form',
-            component: () => import('@/views/table/tree/index'),
-            meta: { title: '安全巡查', icon: 'form' }
-          }
-        ]
+        meta: { title: '安全巡查添加', icon: 'tree' }
+      },
+      {
+        path: 'form',
+        name: 'SafetyInspectionList', // 更具体的命名
+        component: () => import('@/views/table/index'),
+        meta: { title: '安全巡查', icon: 'form' }
       }
     ]
   },
