@@ -156,13 +156,13 @@
         </el-form-item>
       </div>
 
-      <el-form-item label="考核人员" class="red-label">
+      <!-- <el-form-item label="考核人员" class="red-label">
         <el-input v-model="ledgerForm.assessmentPerson" placeholder="请输入考核人员" class="red-text" />
       </el-form-item>
 
       <el-form-item label="考核金额" class="red-label">
         <el-input v-model="ledgerForm.assessmentAmount" type="number" placeholder="请输入考核金额" class="red-text" />
-      </el-form-item>
+      </el-form-item> -->
 
       <el-button type="primary" @click="handleSubmit">提交</el-button>
     </el-form>
@@ -170,6 +170,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
@@ -210,6 +212,17 @@ export default {
     handleSubmit() {
       console.log('表单数据提交：', this.ledgerForm)
       // 提交表单逻辑
+      axios.post('http://localhost:9926/ledger/add', this.ledgerForm)
+        .then(response => {
+          console.log('提交成功：', response.data)
+          // 提交成功后的处理逻辑，例如显示提示信息
+          this.$message.success('提交成功！')
+        })
+        .catch(error => {
+          console.error('提交失败：', error)
+          // 提交失败后的处理逻辑
+          this.$message.error('提交失败，请重试！')
+        })
     },
     handlePictureSuccess(response, file, fileList) {
       // 处理上传成功的照片

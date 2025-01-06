@@ -11,7 +11,11 @@ import '@/styles/index.scss' // global css
 import App from './App'
 import store from './store'
 import router from './router'
+import Axios from 'axios'
 
+Axios.defaults.baseURL = 'http://localhost:8080'
+
+Vue.prototype.$http = Axios
 import '@/icons' // icon
 import '@/permission' // permission control
 
@@ -25,7 +29,7 @@ import '@/permission' // permission control
  */
 if (process.env.NODE_ENV === 'production') {
   const { mockXHR } = require('../mock')
-  mockXHR()
+  // mockXHR()
 }
 
 // set ElementUI lang to EN
