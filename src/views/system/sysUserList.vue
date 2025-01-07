@@ -1,167 +1,211 @@
 <template>
-  <el-main>
-    <!-- 搜索栏 -->
-    <el-form
-      ref="searchRef"
-      :model="listParm"
-      label-width="80px"
-      :inline="true"
-      size="small"
-    >
-      <!-- 姓名输入框 -->
-      <el-form-item>
-        <el-input
-          v-model="listParm.nickName"
-          placeholder="请输入姓名"
-        />
-      </el-form-item>
+  <div>
+    <el-card>
+      <div class="header">
+        <el-button type="primary" @click="openDialog('add')">新增用户</el-button>
+        <el-input v-model="searchText" placeholder="请输入用户名或电话" clearable />
+        <el-button type="primary" icon="el-icon-search" @click="handleSearch">
+          查询
+        </el-button>
+      </div>
+      <el-table :data="userList" border stripe style="width: 100%">
+        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column prop="username" label="用户名" />
+        <el-table-column prop="phone" label="电话" />
+        <el-table-column prop="permissions" label="权限" />
+        <el-table-column label="操作" width="200">
+          <template #default="scope">
+            <el-button type="primary" size="small" @click="openDialog('edit', scope.row)">编辑</el-button>
+            <el-button type="danger" size="small" @click="deleteUser(scope.row.id)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
 
-      <!-- 电话输入框 -->
-      <el-form-item>
-        <el-input
-          v-model="listParm.phone"
-          placeholder="请输入电话"
-        />
-      </el-form-item>
-
-      <!-- 按钮组 -->
-      <el-form-item>
-        <el-button
-          icon="el-icon-search"
-          @click="searchBtn"
-        >搜索</el-button>
-        <el-button
-          style="color: #ff7670"
-          icon="el-icon-close"
-          @click="resetBtn"
-        >重置</el-button>
-        <el-button
-          type="primary"
-          icon="el-icon-plus"
-          @click="addBtn"
-        >新增</el-button>
-      </el-form-item>
-    </el-form>
-
-    <!-- 表格 -->
-    <el-table :height="tableHeight" :data="tableData" border stripe>
-      <el-table-column prop="name" label="姓名" />
-      <el-table-column prop="address" label="地址" />
-      <el-table-column prop="date" label="日期" />
-      <el-table-column label="操作" align="center" width="180">
-        <template #default="{ scope }">
-          <el-button
-            type="primary"
-            size="small"
-            icon="el-icon-edit"
-            @click="editBtn(scope.row)"
-          >编辑</el-button>
-          <el-button
-            type="danger"
-            size="small"
-            icon="el-icon-delete"
-            @click="deleteBtn(scope.row)"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <!-- 分页 -->
-    <el-pagination
-      :current-page.sync="listParm.currentPage"
-      :page-sizes="[10, 20, 40, 80, 100]"
-      :page-size="listParm.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="listParm.total"
-      background
-      @size-change="sizeChange"
-      @current-change="currentChange"
-    />
-  </el-main>
+    <!-- 新增/编辑弹窗 -->
+    <el-dialog :title="dialogType === 'add' ? '新增用户' : '编辑用户'" :visible.sync="dialogVisible">
+      <el-form :model="dialogForm" :rules="dialogRules" ref="dialogForm" label-width="100px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="dialogForm.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="电话" prop="phone">
+          <el-input v-model="dialogForm.phone" placeholder="请输入电话" />
+        </el-form-item>
+        <el-form-item label="权限" prop="permissions">
+          <el-select v-model="dialogForm.permissions" placeholder="请选择权限">
+            <el-option label="Admin" value="Admin" />
+            <el-option label="User" value="User" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input
+            v-model="dialogForm.password"
+            placeholder="请输入密码"
+            :type="passwordVisible ? 'text' : 'password'"
+          >
+            <template #append>
+              <el-button type="text" @click="togglePasswordVisible">
+                <i :class="passwordVisible ? 'el-icon-view' : 'el-icon-view-off'" />
+              </el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="dialogSave">保存</el-button>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
-      // 表格高度
-      tableHeight: 0,
-      // 列表查询的参数
-      listParm: {
-        phone: '',
-        nickName: '',
-        currentPage: 1,
-        pageSize: 10,
-        total: 0
+      searchText: "", // 搜索框文本
+      userList: [], // 用户列表
+      dialogVisible: false, // 控制弹窗显示
+      dialogType: "add", // 当前弹窗类型：add 或 edit
+      passwordVisible: false, // 控制密码可见性
+      dialogForm: {
+        id: null,
+        username: "",
+        phone: "",
+        permissions: "",
+        password: "",
       },
-      // 表格数据
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        }
-      ]
-    }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.tableHeight = window.innerHeight - 220
-    })
+      dialogRules: {
+        username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
+        phone: [{ required: true, message: "请输入电话", trigger: "blur" }],
+        permissions: [{ required: true, message: "请选择权限", trigger: "change" }],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+      },
+    };
   },
   methods: {
-    // 重置按钮
-    resetBtn() {
-      this.listParm.nickName = ''
-      this.listParm.phone = ''
-      this.listParm.currentPage = 1
-      this.listParm.pageSize = 10
+    // 加载用户数据
+    loadData() {
+      axios
+        .get("/user")
+        .then((res) => {
+          this.userList = res.data || [];
+        })
+        .catch((err) => {
+          console.error("加载用户列表失败", err);
+        });
     },
+    // 点击查询按钮后进行搜索
+    handleSearch() {
+      const searchParams = {};
+      if (this.searchText) {
+        // 判断输入的内容是用户名还是电话
+        const isPhone = /^[\d]{11}$/.test(this.searchText); // 简单的手机号正则验证
+        if (isPhone) {
+          searchParams.phone = this.searchText;
+        } else {
+          searchParams.username = this.searchText;
+        }
 
-    // 搜索按钮
-    searchBtn() {
-      // Perform search logic (e.g., API call)
-      console.log('Searching for:', this.listParm)
+        // 发送请求到后端查询
+        axios
+          .get("/user/query", { params: searchParams })
+          .then((res) => {
+            if (res.data) {
+              this.userList = [res.data]; // 返回的单个用户，更新为一个数组
+            } else {
+              this.userList = []; // 如果没有找到用户，清空列表
+              this.$message.warning("未找到相关用户");
+            }
+          })
+          .catch((err) => {
+            console.error("查询失败", err);
+            this.$message.error("查询失败");
+          });
+      } else {
+        // 如果搜索框为空，重新加载所有用户
+        this.loadData();
+      }
     },
-
-    // 新增按钮
-    addBtn() {
-      // Navigate to add page or trigger add modal
-      console.log('Add new item')
+    // 打开新增/编辑弹窗
+    openDialog(type, user = null) {
+      this.dialogType = type;
+      this.dialogForm = type === "edit" ? { ...user, password: "" } : { id: null, username: "", phone: "", permissions: "", password: "" };
+      this.dialogVisible = true;
     },
+    // 保存新增或编辑用户
+    dialogSave() {
+      this.$refs.dialogForm.validate((valid) => {
+        if (!valid) return;
 
-    // 编辑按钮
-    editBtn(row) {
-      // Open edit modal or navigate to edit page
-      console.log('Editing row:', row)
+        const user = this.dialogForm;
+        if (this.dialogType === "add") {
+          // 新增用户
+          axios
+            .post("/user", user)
+            .then(() => {
+              this.dialogVisible = false;
+              this.loadData();
+              this.$message.success("用户新增成功");
+            })
+            .catch((err) => {
+              console.error("新增失败", err);
+              this.$message.error("用户新增失败");
+            });
+        } else {
+          // 编辑用户
+          axios
+            .put(`/user/${user.id}`, user)
+            .then(() => {
+              this.dialogVisible = false;
+              this.loadData();
+              this.$message.success("用户编辑成功");
+            })
+            .catch((err) => {
+              console.error("编辑失败", err);
+              this.$message.error("用户编辑失败");
+            });
+        }
+      });
     },
-
-    // 删除按钮
-    deleteBtn(row) {
-      // Confirm and delete the row
-      console.log('Deleting row:', row)
+    // 删除用户
+    deleteUser(id) {
+      this.$confirm("确认删除该用户？", "提示", {
+        type: "warning",
+      })
+        .then(() => {
+          axios
+            .delete(`/user/${id}`)
+            .then(() => {
+              this.loadData();
+              this.$message.success("用户删除成功");
+            })
+            .catch((err) => {
+              console.error("删除失败", err);
+              this.$message.error("用户删除失败");
+            });
+        })
+        .catch(() => {
+          this.$message.info("已取消删除");
+        });
     },
-
-    // 页容量变化触发
-    sizeChange(val) {
-      this.listParm.pageSize = val
-      console.log('Page size changed to:', val)
+    // 切换密码可见性
+    togglePasswordVisible() {
+      this.passwordVisible = !this.passwordVisible;
     },
-
-    // 页数变化触发
-    currentChange(val) {
-      this.listParm.currentPage = val
-      console.log('Current page changed to:', val)
-    }
-  }
-}
+  },
+  mounted() {
+    this.loadData();
+  },
+};
 </script>
 
-<style lang="scss" scoped>
-/* Add any specific styling needed here */
+<style scoped>
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
 </style>
