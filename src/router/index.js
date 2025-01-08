@@ -85,16 +85,26 @@ export const asyncRoutes = [
 
 // 根据角色动态加载路由
 export function addRoutes() {
-  const roles = store.getters['user/roles'];  // 获取当前用户的角色
-  console.log('User roles:', roles); // 输出用户角色
+  const roles = store.state.user.roles; // 直接从 state 获取 roles
+  console.log('Roles from state in addRoutes:', roles);
+  // 确保 roles 是一个非空数组
+  if (!roles || roles.length === 0) {
+    console.error('Roles not defined or empty:', roles);
+    return;
+  }
 
-  const accessibleRoutes = filterRoutes(asyncRoutes, roles);  // 根据角色过滤路由
-  console.log('Filtered Accessible Routes:', accessibleRoutes); // 输出过滤后的路由
+  // 根据 roles 过滤动态路由
+  const accessibleRoutes = filterRoutes(asyncRoutes, roles);
+  console.log('Filtered Accessible Routes:', accessibleRoutes); // 检查过滤后的路由
 
-  router.addRoutes([...accessibleRoutes, { path: '*', redirect: '/404', hidden: true }]); // 动态添加路由
-  console.log('Router options after addRoutes:', router.options.routes); // 输出完整路由配置
+  // 动态添加路由
+  router.addRoutes(accessibleRoutes);
+
+  // 手动同步 router.options.routes，确保全局路由配置更新
+  router.options.routes = constantRoutes.concat(accessibleRoutes);
+  console.log('Updated Router options after addRoutes:', router.options.routes);
+  
 }
-
 
 /**
  * 根据角色过滤路由

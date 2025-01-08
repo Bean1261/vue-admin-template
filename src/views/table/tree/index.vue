@@ -170,7 +170,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { addLedgerEntry } from '@/api/Ledger';
 
 export default {
   data() {
@@ -194,46 +194,103 @@ export default {
         eValue: '',
         cValue: '',
         dValue: '',
-        beforeRectificationPhoto: '',
+        beforeRectificationPhoto: [], // 照片对象数组 [{ id, url }]
         issueDescription: '',
         isFirstDiscovery: false,
         teamLeader: '',
         deductionScore: '',
         inspector: '',
-        afterRectificationPhoto: '',
+        afterRectificationPhoto: [], // 照片对象数组 [{ id, url }]
         analysisAndMeasures: '',
         rectificationFinishTime: '',
-        assessmentPerson: '',
-        assessmentAmount: ''
-      }
-    }
+      },
+    };
   },
   methods: {
-    handleSubmit() {
-      console.log('表单数据提交：', this.ledgerForm)
-      // 提交表单逻辑
-      axios.post('http://localhost:9926/ledger/add', this.ledgerForm)
-        .then(response => {
-          console.log('提交成功：', response.data)
-          // 提交成功后的处理逻辑，例如显示提示信息
-          this.$message.success('提交成功！')
-        })
-        .catch(error => {
-          console.error('提交失败：', error)
-          // 提交失败后的处理逻辑
-          this.$message.error('提交失败，请重试！')
-        })
-    },
+    // 照片上传成功处理
     handlePictureSuccess(response, file, fileList) {
-      // 处理上传成功的照片
+      const photoInfo = {
+        id: response.id,  // 照片的唯一 ID（后端返回）
+        url: response.url // 照片的访问 URL（后端返回）
+      };
+
+      // 判断是整改前还是整改后的照片
+      if (fileList === this.$refs.beforeUpload) {
+        this.ledgerForm.beforeRectificationPhoto.push(photoInfo);
+      } else {
+        this.ledgerForm.afterRectificationPhoto.push(photoInfo);
+      }
     },
+
+    // 上传前校验
     beforeUpload(file) {
-      // 上传前的验证逻辑
-      return true
-    }
-  }
-}
+      const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPGOrPNG) {
+        this.$message.error('上传的图片格式只能是 JPG 或 PNG!');
+      }
+      if (!isLt2M) {
+        this.$message.error('上传的图片大小不能超过 2MB!');
+      }
+
+      return isJPGOrPNG && isLt2M;
+    },
+
+    // 提交表单
+    handleSubmit() {
+      const payload = { ...this.ledgerForm };
+
+      // 提交前只传递照片 ID
+      payload.beforeRectificationPhoto = payload.beforeRectificationPhoto.map(photo => photo.id);
+      payload.afterRectificationPhoto = payload.afterRectificationPhoto.map(photo => photo.id);
+
+      addLedgerEntry(payload)
+        .then(() => {
+          this.$message.success('提交成功！');
+          this.resetForm();
+        })
+        .catch(() => {
+          this.$message.error('提交失败，请重试！');
+        });
+    },
+
+    // 重置表单
+    resetForm() {
+      this.ledgerForm = {
+        inspectionType: '',
+        checkTime: '',
+        rectificationDeadline: '',
+        hazardSeverity: '',
+        issueCategory: '',
+        subCategory: '',
+        detailedCategory: '',
+        department: '',
+        hazardArea: '',
+        personInCharge: '',
+        subArea: '',
+        detailedArea: '',
+        issueObject: '',
+        issueMode: '',
+        lValue: '',
+        eValue: '',
+        cValue: '',
+        dValue: '',
+        beforeRectificationPhoto: [],
+        issueDescription: '',
+        isFirstDiscovery: false,
+        teamLeader: '',
+        deductionScore: '',
+        inspector: '',
+        afterRectificationPhoto: [],
+        analysisAndMeasures: '',
+        rectificationFinishTime: '',
+      };
+    },
+  },
+};
 </script>
+
 
 <style scoped>
 .form-row {

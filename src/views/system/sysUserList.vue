@@ -33,8 +33,8 @@
         </el-form-item>
         <el-form-item label="权限" prop="permissions">
           <el-select v-model="dialogForm.permissions" placeholder="请选择权限">
-            <el-option label="Admin" value="Admin" />
-            <el-option label="User" value="User" />
+            <el-option label="admin" value="admin" />
+            <el-option label="user" value="user" />
           </el-select>
         </el-form-item>
         <el-form-item label="密码" prop="password">
