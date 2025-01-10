@@ -7,37 +7,53 @@ import request from '@/utils/request';
  */
 export function addLedgerEntry(data) {
   return request({
-    url: '/ledger/add',
+    url: '/api/ledger/save',
     method: 'post',
     data,
-  });
+  });  
 }
 
 /**
- * 更新隐患排查治理台账记录
- * @param {String} id - 台账记录的 ID
- * @param {Object} data - 更新的台账数据
+ * 
+ * @param {Object} params - 上传图片
  * @returns {Promise}
  */
-export function updateLedgerEntry(id, data) {
+export function addPhoto(formData) {
   return request({
-    url: `/ledger/update/${id}`,
-    method: 'put',
-    data,
+    url: '/api/ledger/upload',  // 上传接口路径
+    method: 'post',
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    data: formData,
   });
 }
 
-/**
- * 删除隐患排查治理台账记录
- * @param {String} id - 台账记录的 ID
- * @returns {Promise}
- */
-export function deleteLedgerEntry(id) {
-  return request({
-    url: `/ledger/delete/${id}`,
-    method: 'delete',
-  });
-}
+// /**
+//  * 更新隐患排查治理台账记录
+//  * @param {String} id - 台账记录的 ID
+//  * @param {Object} data - 更新的台账数据
+//  * @returns {Promise}
+//  */
+// export function updateLedgerEntry(id, data) {
+//   return request({
+//     url: `/ledger/update/${id}`,
+//     method: 'put',
+//     data,
+//   });
+// }
+
+// /**
+//  * 删除隐患排查治理台账记录
+//  * @param {String} id - 台账记录的 ID
+//  * @returns {Promise}
+//  */
+// export function deleteLedgerEntry(id) {
+//   return request({
+//     url: `/ledger/delete/${id}`,
+//     method: 'delete',
+//   });
+// }
 
 /**
  * 获取隐患排查治理台账记录列表

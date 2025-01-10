@@ -6,15 +6,16 @@
         <h3 class="title">燃气动力管理系统</h3>
       </div>
 
-      <el-form-item prop="username">
+      <!-- 替换用户名为手机号 -->
+      <el-form-item prop="phone">
         <span class="svg-container">
-          <svg-icon icon-class="user" />
+          <svg-icon icon-class="phone" />
         </span>
         <el-input
-          ref="username"
-          v-model="loginForm.username"
-          placeholder="用户名"
-          name="username"
+          ref="phone"
+          v-model="loginForm.phone"
+          placeholder="手机号"
+          name="phone"
           type="text"
           tabindex="1"
           auto-complete="on"
@@ -48,13 +49,17 @@
 </template>
 
 <script>
-import { validUsername } from '@/utils/validate'
+import { validPhone } from '@/utils/validate'
 
 export default {
   name: 'Login',
   data() {
-    const validateUsername = (rule, value, callback) => {
-      callback() // 始终通过验证
+    const validatePhone = (rule, value, callback) => {
+      if (!/^\d{11}$/.test(value)) {
+        callback(new Error('请输入有效的手机号'))
+      } else {
+        callback()
+      }
     }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
@@ -65,14 +70,16 @@ export default {
     }
     return {
       loginForm: {
+        phone: '', // 替换用户名为手机号
+        password: '',
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        phone: [{ required: true, trigger: 'blur', validator: validatePhone }],
+        password: [{ required: true, trigger: 'blur', validator: validatePassword }],
       },
       loading: false,
       passwordType: 'password',
-      redirect: undefined
+      redirect: undefined,
     }
   },
   watch: {
@@ -80,7 +87,7 @@ export default {
       handler: function(route) {
         this.redirect = route.query && route.query.redirect
       },
-      immediate: true
+      immediate: true,
     }
   },
   methods: {
@@ -95,13 +102,14 @@ export default {
       })
     },
     handleLogin() {
-      this.$refs.loginForm.validate(valid => {
+      this.$refs.loginForm.validate((valid) => {
         if (valid) {
           this.loading = true
           this.$store.dispatch('user/login', this.loginForm).then(() => {
             this.$router.push({ path: this.redirect || '/' })
             this.loading = false
-          }).catch(() => {
+          }).catch((error) => {
+            console.error('Login Error:', error) // 显示具体的错误信息
             this.loading = false
           })
         } else {
@@ -110,6 +118,7 @@ export default {
         }
       })
     }
+
   }
 }
 </script>

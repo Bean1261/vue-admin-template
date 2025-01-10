@@ -27,12 +27,10 @@ module.exports = {
       '/upload': {
         target: 'http://localhost:8080', // 后端服务地址
         changeOrigin: true, // 允许跨域
-        pathRewrite: { '^/upload': '/upload' } // 可选，保持路径一致
       },
       '/api': {
         target: 'http://localhost:8080', // 如果还有其他接口需要代理
         changeOrigin: true,
-        pathRewrite: { '^/api': '/api' }
       }
     },
     before: require('./mock/mock-server.js') // Mock 数据

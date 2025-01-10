@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 /**
  * 用户登录
- * @param {Object} data - 用户登录信息 { username, password }
+ * @param {Object} data - 用户登录信息 { phone, password }
  * @returns {Promise}
  */
 export function login(data) {
@@ -37,3 +37,15 @@ export function logout() {
   })
 }
 
+/**
+ * 搜索用户
+ * @param {String} query - 搜索关键字
+ * @returns {Promise} - 返回用户列表
+ */
+export function searchUsers(query) {
+  return request({
+    url: '/user/search',
+    method: 'get',
+    params: { query },
+  });
+}

@@ -43,13 +43,13 @@ export const constantRoutes = [
         path: 'security',
         name: 'SecurityManagement',
         component: () => import('@/views/table/tree/index'),
-        meta: { title: '安全管理', icon: 'table', roles: ['admin', 'editor'] },
+        meta: { title: '台账添加', icon: 'table', roles: ['admin', 'editor'] },
       },
       {
         path: 'inspection',
         name: 'SafetyInspection',
-        component: () => import('@/views/table/tree/index'),
-        meta: { title: '安全巡查', icon: 'tree', roles: ['admin', 'editor'] },
+        component: () => import('@/views/table/list/index'),
+        meta: { title: '台账管理', icon: 'tree', roles: ['admin', 'editor'] },
       }
     ]
   },
