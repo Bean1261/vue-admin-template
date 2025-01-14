@@ -3,7 +3,7 @@
     <el-card>
       <div class="header">
         <el-button type="primary" @click="openDialog('add')">新增用户</el-button>
-        <el-input v-model="searchText" placeholder="请输入用户名或电话" clearable />
+        <el-input v-model="searchText" placeholder="请输入用户名或编号" clearable />
         <el-button type="primary" icon="el-icon-search" @click="handleSearch">
           查询
         </el-button>
@@ -11,7 +11,7 @@
       <el-table :data="userList" border stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" />
-        <el-table-column prop="phone" label="电话" />
+        <el-table-column prop="phone" label="编号" />
         <el-table-column prop="permissions" label="权限" />
         <el-table-column label="操作" width="200">
           <template #default="scope">
@@ -28,8 +28,8 @@
         <el-form-item label="用户名" prop="username">
           <el-input v-model="dialogForm.username" placeholder="请输入用户名" />
         </el-form-item>
-        <el-form-item label="电话" prop="phone">
-          <el-input v-model="dialogForm.phone" placeholder="请输入电话" />
+        <el-form-item label="编号" prop="phone">
+          <el-input v-model="dialogForm.phone" placeholder="请输入编号" />
         </el-form-item>
         <el-form-item label="权限" prop="permissions">
           <el-select v-model="dialogForm.permissions" placeholder="请选择权限">
@@ -79,7 +79,7 @@ export default {
       },
       dialogRules: {
         username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-        phone: [{ required: true, message: "请输入电话", trigger: "blur" }],
+        phone: [{ required: true, message: "请输入编号", trigger: "blur" }],
         permissions: [{ required: true, message: "请选择权限", trigger: "change" }],
         password: [{ required: true, message: "请输入密码", trigger: "blur" }],
       },
@@ -101,8 +101,8 @@ export default {
     handleSearch() {
       const searchParams = {};
       if (this.searchText) {
-        // 判断输入的内容是用户名还是电话
-        const isPhone = /^[\d]{11}$/.test(this.searchText); // 简单的手机号正则验证
+        // 判断输入的内容是用户名还是编号
+        const isPhone = /^[\d]{7}$/.test(this.searchText); // 简单的手机号正则验证
         if (isPhone) {
           searchParams.phone = this.searchText;
         } else {

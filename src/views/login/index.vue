@@ -3,10 +3,9 @@
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
 
       <div class="title-container">
-        <h3 class="title">燃气动力管理系统</h3>
+        <h3 class="title">燃气动力公司安全生产隐患排查系统</h3>
       </div>
 
-      <!-- 替换用户名为手机号 -->
       <el-form-item prop="phone">
         <span class="svg-container">
           <svg-icon icon-class="phone" />
@@ -62,8 +61,8 @@ export default {
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('密码不能小于6位'))
+      if (value.length < 2) {
+        callback(new Error('密码位数过短'))
       } else {
         callback()
       }

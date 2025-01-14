@@ -26,16 +26,18 @@ router.beforeEach(async(to, from, next) => {
       next({ path: '/' })
       NProgress.done()
     } else {
-      const hasGetUserInfo = store.getters.name
+      const hasGetUserInfo = store.getters && store.getters.name || '' // Ensure safe access to getters
       if (hasGetUserInfo) {
         next()
       } else {
         try {
           // get user info
+          console.log('Fetching user info...')
           await store.dispatch('user/getInfo')
-
+          console.log('User info fetched successfully.')
           next()
         } catch (error) {
+          console.error('Error fetching user info:', error)
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
           Message.error(error || 'Has Error')

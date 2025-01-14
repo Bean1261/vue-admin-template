@@ -12,7 +12,11 @@
       <!-- 第一行 -->
       <div class="form-row">
         <el-form-item label="巡查类型" prop="inspectionType">
-          <el-input v-model="ledgerForm.inspectionType" placeholder="请输入巡查类型" />
+          <el-select v-model="ledgerForm.hazardSeverity" placeholder="选择隐患严重程度">
+            <el-option label="试车巡逻" value="试车巡逻" />
+            <el-option label="中等" value="中等" />
+            <el-option label="严重" value="严重" />
+          </el-select>
         </el-form-item>
         <el-form-item label="排查时间" prop="checkTime">
           <el-date-picker v-model="ledgerForm.checkTime" type="date" placeholder="选择排查时间" />
@@ -55,7 +59,18 @@
           <el-input v-model="ledgerForm.hazardArea" placeholder="请输入隐患区域" />
         </el-form-item>
         <el-form-item label="责任人" prop="personInCharge">
-          <el-input v-model="ledgerForm.personInCharge" placeholder="请输入责任人" />
+          <el-autocomplete
+            v-model="ledgerForm.personInCharge"
+            :fetch-suggestions="fetchUsernames"
+            placeholder="请输入责任人"
+            @select="handleSelectUser"
+          >
+            <template v-slot="{ item }">
+              <div>
+                <span>{{ item.name }}</span> - <span style="color: gray;">{{ item.phone }}</span>
+              </div>
+            </template>
+          </el-autocomplete>
         </el-form-item>
       </div>
       <!-- 第六行 -->
@@ -148,7 +163,6 @@
             </template>
           </el-autocomplete>
         </el-form-item>
-
       </div>
       <!-- 提交按钮 -->
       <div class="button-row">
@@ -162,6 +176,8 @@
 <script>
 import { addLedgerEntry } from '@/api/Ledger';
 import { searchUsers } from '@/api/user'; // 确保路径正确
+import { getToken } from '@/utils/auth'; // 引入获取 token 的方法
+import { jwtDecode } from 'jwt-decode'; // 确保项目中安装并引入 jwt-decode 库
 
 export default {
   data() {
@@ -186,15 +202,14 @@ export default {
         cValue: '',
         dValue: '',
         issueDescription: '',
-        isFirstDiscovery: false,
-        beforeRectificationPhotos: '', // 照片对象数组 [{ id, url }]
-        afterRectificationPhotos: '', // 照片对象数组 [{ id, url }]
+        beforeRectificationPhotos: '', 
+        afterRectificationPhotos: '', 
         teamLeader: '',
-        deductionScore: '',
         inspector: '',
         analysisAndMeasures: '',
         rectificationFinishTime: '',
         assessmentPerson: '',
+        currentUserPhone: ''
       },
       rules: {
         inspectionType: [{ required: true, message: '请输入巡查类型', trigger: 'blur' }],
@@ -222,7 +237,20 @@ export default {
       },
     };
   },
+  created() {
+    this.extractPhoneFromToken(); // 在组件创建时提取 phone
+  },
   methods: {
+    extractPhoneFromToken() {
+      try {
+        const token = getToken(); // 获取 token
+        console.log('Token:', getToken());
+        const decoded = jwtDecode(token); // 解码 token
+        this.ledgerForm.currentUserPhone = decoded.sub; // 提取 phone 并赋值
+      } catch (error) {
+        console.error('Token 解码失败或 phone 不存在', error);
+      }
+    },
     // 调用后端接口搜索用户
     fetchUsernames(queryString, callback) {
       if (!queryString) {
@@ -327,6 +355,7 @@ export default {
         analysisAndMeasures: '',
         rectificationFinishTime: '',
         assessmentPerson: '',
+        currentUserPhone: ''
       };
     },
   },
