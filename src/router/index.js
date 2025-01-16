@@ -49,8 +49,14 @@ export const constantRoutes = [
         path: 'inspection',
         name: 'SafetyInspection',
         component: () => import('@/views/table/list/index'),
-        meta: { title: '台账管理', icon: 'tree', roles: ['admin', 'editor'] },
-      }
+        meta: { title: '台账管理', icon: 'tree', roles: ['admin'] },
+      },
+      {
+        path: 'approval',
+        name: 'SafetyApproval',
+        component: () => import('@/views/table/approve/index'),
+        meta: { title: '台账审批', icon: 'eye', roles: ['admin', 'editor'] },
+      },
     ]
   },
 

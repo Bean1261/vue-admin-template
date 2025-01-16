@@ -12,7 +12,7 @@
       <!-- 第一行 -->
       <div class="form-row">
         <el-form-item label="巡查类型" prop="inspectionType">
-          <el-select v-model="ledgerForm.hazardSeverity" placeholder="选择隐患严重程度">
+          <el-select v-model="ledgerForm.inspectionType" placeholder="选择隐患严重程度">
             <el-option label="试车巡逻" value="试车巡逻" />
             <el-option label="中等" value="中等" />
             <el-option label="严重" value="严重" />

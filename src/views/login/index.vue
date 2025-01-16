@@ -13,7 +13,7 @@
         <el-input
           ref="phone"
           v-model="loginForm.phone"
-          placeholder="手机号"
+          placeholder="员工号"
           name="phone"
           type="text"
           tabindex="1"
@@ -55,7 +55,7 @@ export default {
   data() {
     const validatePhone = (rule, value, callback) => {
       if (!/^\d{11}$/.test(value)) {
-        callback(new Error('请输入有效的手机号'))
+        callback(new Error('请输入有效的员工号'))
       } else {
         callback()
       }
@@ -69,7 +69,7 @@ export default {
     }
     return {
       loginForm: {
-        phone: '', // 替换用户名为手机号
+        phone: '', 
         password: '',
       },
       loginRules: {
