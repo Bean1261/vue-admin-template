@@ -49,6 +49,9 @@ const mutations = {
  * 定义异步操作函数
  */
 const actions = {
+  setToken({ commit }, token) {
+    commit('SET_TOKEN', token);
+  },
   /**
    * 用户登录
    * @param {Object} commit Vuex的commit函数，用于调用mutation
